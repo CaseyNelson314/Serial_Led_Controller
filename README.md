@@ -11,8 +11,8 @@ WS2812B
 
 Adafruit NeoPixelライブラリを使用するためインストールしてください
 
-[ここから](/Adafruit_NeoPixel)
+[ここれをライブラリファイルに入れる](/Adafruit_NeoPixel)
 
-またはライブラリ管理(ctrl+Shift+i)から
+またはライブラリ管理(ctrl+Shift+i)
 
 ![](/img.png)
