@@ -15,4 +15,4 @@ Adafruit NeoPixelライブラリを使用するためインストールしてく
 
 またはライブラリ管理(ctrl+Shift+i)から
 
-![](/img.png)![img](https://user-images.githubusercontent.com/91818705/148889003-3686495a-ff58-494f-8e42-bc9d1069dea6.png)
+![](/img.png)
