@@ -4,7 +4,7 @@
 class LedController {
 
   private:
-    Adafruit_NeoPixel* serialLed;
+    Adafruit_NeoPixel* pixel;
     int8_t pin;
     int ledNum;
     int cycle;
@@ -15,13 +15,13 @@ class LedController {
     bool direction = 1;
 
   public:
-    LedController(int8_t pin, int ledNum, int cycle, int8_t maxPower, int ledGroups):
+    LedController(int8_t pin, int ledNum, int cycle, int8_t maxPower, int ledGroups = 1):
       pin(pin), ledNum(ledNum), cycle(cycle), maxPower(maxPower), ledGroups(ledGroups) {
-      serialLed = new Adafruit_NeoPixel(ledNum, pin);
-      serialLed->begin();
+      pixel = new Adafruit_NeoPixel(ledNum, pin);
+      pixel->begin();
     }
     ~LedController() {
-      serialLed->~Adafruit_NeoPixel();
+      pixel->~Adafruit_NeoPixel();
     }
 
     /*1つのLEDの色相が1周する周期(ms)*/
@@ -39,24 +39,61 @@ class LedController {
       this->maxPower = maxPower;
     }
 
-    /*流れる方向(1:データ転送方向と同じ方向 0:逆)*/
+    /*流れる方向(1:データ転送方向と同じ方向 0:逆方向)*/
     void setDirection(bool direction) {
       this->direction = direction;
     }
 
-    void show() {
+
+
+
+    /*出力*/
+    void showWave() {
       /*error*/
-      if (!cycle || !ledGroups)
-        return;
+      if (!cycle || !ledGroups)return;
 
       if ((time = millis()) - lastTime > cycle)lastTime = time;
+      float referenceX = (float)(time - lastTime) * 2 / cycle;
+
       for (int j = 0; j < ledNum; j++) {
-        int8_t outData[3];
-        float nowTime = (float)(time - lastTime) * 2 / cycle - (direction ? 1 : -1) * ((float)j * 2 / ledGroups); //sin波出力用のx軸
+        int8_t rgbData[3];  //RGBデータ格納用
+        float x = referenceX - (direction ? 1 : -1) * ((float)j * 2 / ledGroups); //sin波出力用のx軸
         for (int i = 0; i < 3; i++)
-          outData[i] = maxPower * (sin(fmod(nowTime - (float)i * 2 / 3, 2) * PI) + 1) / 2;
-        serialLed->setPixelColor(j, outData[0], outData[1], outData[2]);
+          rgbData[i] = maxPower * (sin(fmod(x - (float)i * 2 / 3, 2) * PI) + 1) / 2;
+        pixel->setPixelColor(j, rgbData[0], rgbData[1], rgbData[2]);
       }
-      serialLed->show();
+      pixel->show();
     }
+
+
+
+    /*LEDすべて同じ色で出力*/
+    void showSameWave() {
+      /*error*/
+      if (!cycle)return;
+
+      if ((time = millis()) - lastTime > cycle)lastTime = time;
+
+      int8_t rgbData[3];
+      float x = (float)(time - lastTime) * 2 / cycle; //sin波出力用のx軸
+      for (int i = 0; i < 3; i++)
+        rgbData[i] = maxPower * (sin(fmod(x - (float)i * 2 / 3, 2) * PI) + 1) / 2;
+
+      for (int i = 0; i < ledNum; i++) {
+        pixel->setPixelColor(i, rgbData[0], rgbData[1], rgbData[2]);
+      }
+      pixel->show();
+    }
+
+    void setPixelColor(uint16_t n, uint8_t r, uint8_t g, uint8_t b) {
+      pixel->setPixelColor(n, r, g, b);
+    }
+
+    /*全消去*/
+    void clear() {
+      for (int i = 0; i < ledNum; i++)
+        pixel->setPixelColor(i, 0);
+      pixel->show();
+    }
+
 };
